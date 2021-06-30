@@ -50,8 +50,11 @@ namespace Utility.SerializableCollection.Editor
         static readonly Color minColor = new Color(0.94f, 0.86f, 0.58f);
         static readonly Color middleColor = new Color(0.92f, 0.66f, 0.4f);
         static readonly Color maxColor = new Color(0.79f, 0.34f, 0.31f);
+
+        public static Color GetColor(float value, float min, float max) =>
+            GetColor(value, min, max, minColor, middleColor, maxColor);
         
-        public static Color GetColor(float value, float min, float max){
+        public static Color GetColor(float value, float min, float max,  Color minColor, Color middleColor, Color maxColor){
             float rate = (value - min) / (max - min);
             if(rate<0.5f)
                 return Color.Lerp(minColor, middleColor, rate*2);
@@ -85,14 +88,14 @@ namespace Utility.SerializableCollection.Editor
     {
         public override string ViewName => "Heatmap";
 
-        int _min, _max;
+        protected int min, max;
 
         public override void InitializationsBeforeDrawing() =>
-            (_min, _max) = HeatMapHelper.GetMinMax<int>(targetMatrix2D); 
+            (min, max) = HeatMapHelper.GetMinMax<int>(targetMatrix2D); 
         
 
         protected override Color? CellColor(int x, int y, int element) =>
-            HeatMapHelper.GetColor(element, _min, _max);
+            HeatMapHelper.GetColor(element, min, max);
 
         protected override Color? TextColor(int x, int y, int element) => Color.black;
     }

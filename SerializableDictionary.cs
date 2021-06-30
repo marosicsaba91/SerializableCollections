@@ -1,40 +1,43 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Utility.SerializableCollection
 {
-	public abstract class SerializableDictionaryBase :IGenericCollection
+	public abstract class SerializableDictionary : IGenericCollection
 	{
 		public abstract Type ContainingType { get; }
 
 		public abstract int Count { get; }
+
+		internal abstract bool ContainsKeyMoreThanOnce(int index);
+
+		internal abstract KeyValuePair<object, object> GetKeyValuePairAt(int index);
 	}
 
-	public class SerializableDictionary<TKey, TValue> : SerializableDictionaryBase,
-		IDictionary<TKey, TValue>
-	{
-		[SerializeField] List<TKey> _keys = default;
-		[SerializeField] List<TValue> _values = default;
-
-		public ICollection<TKey> Keys => _keys;
-		public ICollection<TValue> Values => _values;
-
+	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
+	{ 
+		[SerializeField] List<TKey> keys = default;
+		[SerializeField] List<TValue> values = default;
+ 
+		public ICollection<TKey> Keys => keys;
+		public ICollection<TValue> Values => values;
+		  
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
-			for (var i = 0; i < _keys.Count; i++)
-				yield return new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
+			for (var i = 0; i < keys.Count; i++)
+				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public void Add(KeyValuePair<TKey, TValue> item)
 		{
-			if (_keys.Contains(item.Key))
+			if (keys.Contains(item.Key))
 				throw new ArgumentException("Key is already in the dictionary");
-			_keys.Add(item.Key);
-			_values.Add(item.Value);
+			keys.Add(item.Key);
+			values.Add(item.Value);
 		}
 
 		public void Add(TKey key, TValue value) => 
@@ -42,63 +45,100 @@ namespace Utility.SerializableCollection
 		
 		public void Clear()
 		{
-			_keys.Clear();
-			_values.Clear();
+			keys.Clear();
+			values.Clear();
 		}
 
 		public bool Contains(KeyValuePair<TKey, TValue> item)
 		{
-			int index = _keys.IndexOf(item.Key);
+			int index = keys.IndexOf(item.Key);
 			if (index < 0) return false;
-			return _values[index].Equals(item.Value);
+			return values[index].Equals(item.Value);
 		}
 
 		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
 		{
-			for (int i = 0; i < array.Length && i+arrayIndex< _keys.Count; i++) 
-				array[i] = new KeyValuePair<TKey, TValue>(_keys[i+arrayIndex], _values[i+arrayIndex]);
+			for (int i = 0; i < array.Length && i+arrayIndex< keys.Count; i++) 
+				array[i] = new KeyValuePair<TKey, TValue>(keys[i+arrayIndex], values[i+arrayIndex]);
 		}
 
 		public bool Remove(KeyValuePair<TKey, TValue> item)
 		{
-			int index = _keys.IndexOf(item.Key);
+			int index = keys.IndexOf(item.Key);
 			if (index < 0) return false;
-			if (_values[index].Equals(item.Value)) return false;
+			if (values[index].Equals(item.Value)) return false;
 			
-			_keys.RemoveAt(index);
-			_values.RemoveAt(index);
+			keys.RemoveAt(index);
+			values.RemoveAt(index);
 			return true;
 		}
 
-		public override Type ContainingType => typeof(KeyValuePair<TKey, TValue>);
-		public override int Count => _keys.Count;
-		
+		public sealed override Type ContainingType => typeof(KeyValuePair<TKey, TValue>);
+
+		public sealed override int Count
+		{
+			get
+			{
+				if (keys == null || values == null || keys.Count != values.Count)
+				{
+					if (keys == null)
+						keys = new List<TKey>();
+					if (values == null)
+						values = new List<TValue>();
+					while (keys.Count > values.Count)
+						keys.RemoveAt(keys.Count-1);
+					while (keys.Count < values.Count)
+						values.RemoveAt(values.Count-1);
+				}
+
+				return keys.Count;
+			}
+		}
+
+		internal override bool ContainsKeyMoreThanOnce(int index)
+		{
+			if (index < 0 || index >= keys.Count) return false;
+			TKey test = keys[index];
+			for (var i = 0; i < keys.Count; i++)
+			{
+				if(i == index)
+					continue;
+				if (Equals(keys[i], test))
+					return true;
+			}
+
+			return false;
+		}
+
+		internal override KeyValuePair<object, object> GetKeyValuePairAt(int index) => 
+			new KeyValuePair<object, object>(keys[index], values[index]);
+
 		public bool IsReadOnly => false;
 
-		public bool ContainsKey(TKey key) => _keys.Contains(key); 
+		public bool ContainsKey(TKey key) => keys.Contains(key); 
 		
 		public bool Remove(TKey key)
 		{
-			int index = _keys.IndexOf(key);
+			int index = keys.IndexOf(key);
 			if (index < 0) return false; 
 			
-			_keys.RemoveAt(index);
-			_values.RemoveAt(index);
+			keys.RemoveAt(index);
+			values.RemoveAt(index);
 			return true;
 		}
 
 		public bool TryGetValue(TKey key, out TValue value)
 		{
-			int index = _keys.IndexOf(key);
+			int index = keys.IndexOf(key);
 			bool contains = index >= 0;
-			value = contains ? _values[index] : default;
+			value = contains ? values[index] : default;
 			return contains;
 		}
 
 		public TValue this[TKey key]
 		{
-			get => _values[_keys.IndexOf(key)];
-			set => _values[_keys.IndexOf(key)] = value;
+			get => values[keys.IndexOf(key)];
+			set => values[keys.IndexOf(key)] = value;
 		} 
 	}
 }

@@ -20,8 +20,7 @@ namespace Utility.SerializableCollection.Editor
             public Vector2 inCellPosition;
             public bool right;
             public bool left;
-        }
-        
+        } 
 
         // Constants
         const float marginSize = 30; 
@@ -58,10 +57,8 @@ namespace Utility.SerializableCollection.Editor
         public SerializedProperty MatrixProperty => collectionProperty;
         public SerializedProperty FieldsProperty => fieldsProperty;
         
-        protected override void InitializeViewBeforeDrawing(SerializedProperty property)
-        {
+        protected override void InitializeViewBeforeDrawing(SerializedProperty property) =>
             CurrentView.InitializationsBeforeDrawing(); 
-        }
 
         protected sealed override void UpdateState_Views(SerializedProperty property)
         {
@@ -129,7 +126,7 @@ namespace Utility.SerializableCollection.Editor
             }
         }
 
-        protected sealed override int AdditionalHeaderWidth => 186;
+        protected sealed override float AdditionalHeaderWidth => 186;
 
         protected sealed override Vector2Int DrawIndexVectorUI(Rect position, Vector2Int size) =>
             EditorGUI.Vector2IntField(position, GUIContent.none, size);
@@ -182,13 +179,13 @@ namespace Utility.SerializableCollection.Editor
             _marginTopHeight = currentView.ShowHeaders || resizing ? marginSize : 0;
         }
 
-        protected sealed override void UpdateState_BeforeDrawingCollection()
+        protected sealed override void UpdateState_BeforeDrawingCollection(Rect contentRect)
         {
-            _cellWidth = CurrentView.ForceCellWidth ?? (fullRect.width - _marginLeftWidth) / _matrixWidth;
+            _cellWidth = CurrentView.ForceCellWidth ?? (contentRect.width - _marginLeftWidth) / _matrixWidth;
             float w = _marginLeftWidth + (_cellWidth * _matrixWidth);
             collectionRect = new Rect(
-                fullRect.x + (fullRect.width / 2) - (w / 2),
-                fullRect.y + headerHeight + 1,
+                contentRect.x + (contentRect.width / 2) - (w / 2),
+                contentRect.y,
                 w,
                 _marginTopHeight + (_cellHeight * _matrixHeight));
         }
@@ -537,38 +534,9 @@ namespace Utility.SerializableCollection.Editor
                 _cellHeight * area.height);
         }
 
-        void DrawCellSelection(Color color, RectInt area, bool inside)
-        {
-            if (area.width == 0 || area.height == 0)
-                return;
-            DrawCellBorder(AreaToRect(area), color, inside);
-        }
-
-        static void DrawCellBorder(Rect rect, Color color, bool inside)
-        {
-            Rect rectL = inside
-                ? new Rect(rect.x, rect.y, selectionBorderWidth, rect.height)
-                : new Rect(rect.x - selectionBorderWidth, rect.y - selectionBorderWidth, selectionBorderWidth,
-                    rect.height + (2 * selectionBorderWidth));
-            EditorGUI.DrawRect(rectL, color);
-
-            Rect rectR = inside
-                ? new Rect(rect.x + rect.width - selectionBorderWidth, rect.y, selectionBorderWidth, rect.height)
-                : new Rect(rect.x + rect.width, rect.y, selectionBorderWidth, rect.height + selectionBorderWidth);
-            EditorGUI.DrawRect(rectR, color);
-
-            Rect rectT = inside
-                ? new Rect(rect.x, rect.y, rect.width, selectionBorderWidth)
-                : new Rect(rect.x - selectionBorderWidth, rect.y - selectionBorderWidth,
-                    rect.width + (2 * selectionBorderWidth), selectionBorderWidth);
-            EditorGUI.DrawRect(rectT, color);
-
-            Rect rectB = inside
-                ? new Rect(rect.x, rect.y + rect.height - selectionBorderWidth, rect.width, selectionBorderWidth)
-                : new Rect(rect.x, rect.y + rect.height, rect.width + selectionBorderWidth, selectionBorderWidth);
-            EditorGUI.DrawRect(rectB, color);
-        }
-
+        void DrawCellSelection(Color color, RectInt area, bool inside) =>
+            DrawSelection(AreaToRect(area), color, inside); 
+        
         void DrawHorizontalSeparator(Color color, int startX, int endX, int afterY)
         {
             int minX = Mathf.Min(startX, endX);

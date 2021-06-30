@@ -16,9 +16,14 @@ namespace Utility.SerializableCollection.Editor
             where TCollection : IGenericCollection
             where TView: ICollectionView
     {
-        protected bool selecting;
-        protected bool aaa;
+        protected bool selecting; 
 
+        protected Rect collectionRect;
+        protected Rect selectedPropertyContentRect;
+        protected Rect selectedPropertyRect;
+        
+        protected SerializedProperty fieldsProperty;
+        
         protected TArea selectedArea;
         protected TArea copiedArea;
         
@@ -34,15 +39,36 @@ namespace Utility.SerializableCollection.Editor
         protected TIndexVector tempSize;
         protected Vector2Int mouseDownCoord;
         
-        
         protected TView defaultView;
         protected readonly List<TView> matrix2DViews = new List<TView>();
         protected int selectedViewIndex = 0;
 
         // Properties
         protected abstract bool SelectedAny { get; }
-        protected abstract bool CopiedAny { get; }
+        protected abstract bool CopiedAny { get; } 
+        
+        protected override bool IsExpandable =>
+            fieldsProperty != null && !IsMultipleObjectSelected && targetObject.Count > 0;
 
+        protected override void UpdateReferences(SerializedProperty property)
+        { 
+            fieldsProperty = collectionProperty.FindPropertyRelative("fields");
+            if (fieldsProperty == null || IsMultipleObjectSelected) return;
+            
+            SerializedProperty firstProperty = FirstProperty;
+            SerializedProperty firstSelectedProperty = FirstSelectedProperty;
+            templateHeightFull = firstSelectedProperty == null ? 0 : EditorGUI.GetPropertyHeight(firstSelectedProperty);
+            isTypeFolding = IsTypeFolding(firstProperty);
+              
+            UpdateState_Views(property);
+            InitializeViewBeforeDrawing(property); 
+        }
+        
+        static bool IsTypeFolding(SerializedProperty property)
+        {
+            SerializedPropertyType? propertyType = property?.propertyType;
+            return propertyType == SerializedPropertyType.Generic;
+        }
 
         bool _isSelectedExpanded;
 
@@ -56,28 +82,7 @@ namespace Utility.SerializableCollection.Editor
                 ApplyToMultipleCells(FullArea, property => property.isExpanded = value);
             }
         }
-
-        protected void UpdateState_BeforeHeader(Rect position)
-        {
-            fullRect = new Rect(
-                position.x + 1,
-                position.y + 1,
-                position.width - 2,
-                position.height - 1);
-
-            headerRect = new Rect(
-                fullRect.x,
-                fullRect.y,
-                fullRect.width,
-                headerHeight);
-
-            foldoutRect = new Rect(
-                headerRect.x + indentWidth,
-                headerRect.y,
-                headerRect.width - AdditionalHeaderWidth - indentWidth,
-                headerHeight);
-        }
-
+        
         protected void ApplyToMultipleCells(TArea area, Action<SerializedProperty> action)
         {
             foreach (SerializedProperty cell in GetEnumeratorToArea(area))
@@ -91,7 +96,7 @@ namespace Utility.SerializableCollection.Editor
 
         protected abstract void UpdateState_BeforeGetPropertyHeight();
 
-        void UpdateState_BeforeDrawingSelected()
+        void UpdateState_BeforeDrawingSelected(Rect fullRect)
         {
             selectedPropertyRect = new Rect(
                 fullRect.x,
@@ -105,18 +110,12 @@ namespace Utility.SerializableCollection.Editor
                 selectedPropertyRect.y + 1,
                 selectedPropertyRect.width - shift - 2,
                 templateHeightFull);
-        }
+        } 
 
-
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-        {
-            UpdateState_BeforeHeader(position);
-
-            // Header
-            if (!TryDrawHeader(property, label)) return;
-
-            if (!property.isExpanded) return;
-
+        protected override void DrawContent(Rect contentRect)
+        { 
+            UpdateState_BeforeDrawingCollection(contentRect);
+            
             // Collection
             DrawCollection();
 
@@ -126,61 +125,35 @@ namespace Utility.SerializableCollection.Editor
             if (!SelectedAny) return;
 
             // Selected
-            UpdateState_BeforeDrawingSelected();
+            UpdateState_BeforeDrawingSelected(contentRect);
             DrawSelectedProperty();
-
         }
 
-        bool TryDrawHeader(SerializedProperty property, GUIContent label)
+        protected override float AdditionalHeaderWidth => 0;
+
+        protected override void DrawAdditionalHeader(Rect additionalHeaderRect)
         {
-            EditorHelper.DrawBox(headerRect, false);
-
-            if (IsExpandable)
-            {
-                property.isExpanded = EditorGUI.Foldout(foldoutRect, property.isExpanded, label);
-                if (GUI.Button(foldoutRect, string.Empty, foldoutButtonStyle))
-                    property.isExpanded = !property.isExpanded;
-            }
-            else
-                EditorGUI.LabelField(foldoutRect, label);
-            
-
-
             if (fieldsProperty == null)
             {
                 DrawSerializationErrorMessage();
-                return false;
+                return;
             }
 
             if (IsMultipleObjectSelected)
             {
                 DrawMultipleSelectMessage();
-                return false;
+                return;
             }
 
-            DrawAdditionalHeader();
-            UpdateState_BeforeDrawingCollection();
-            return true;
-        }
 
-        protected virtual int AdditionalHeaderWidth => 0;
-
-        protected void DrawAdditionalHeader()
-        {
             const int buttonsFieldsWidth = 76;
-            int sizeFieldWidth = AdditionalHeaderWidth - buttonsFieldsWidth;
-            
+            float sizeFieldWidth = AdditionalHeaderWidth - buttonsFieldsWidth;
+
             const int okButtonWidth = 30;
             const int horizontalSpacing = 2;
 
             // Matrix Size
             bool resize = this.context == Context.Resize;
-
-            var additionalHeaderRect = new Rect(
-                headerRect.x + headerRect.width - AdditionalHeaderWidth + 1,
-                headerRect.y - 1,
-                AdditionalHeaderWidth,
-                headerHeight + 2);
 
             var sizeLabelPosition = new Rect(
                 additionalHeaderRect.x,
@@ -190,7 +163,7 @@ namespace Utility.SerializableCollection.Editor
 
 
             GUI.enabled = resize;
-                
+
             TIndexVector size = this.context == Context.Resize ? tempSize : MatrixSize;
             tempSize = DrawIndexVectorUI(sizeLabelPosition, size);
 
@@ -205,7 +178,7 @@ namespace Utility.SerializableCollection.Editor
                 {
                     RecordForUndo("ResizeMatrix");
                     MatrixSize = tempSize;
-                    this.context = Context.Edit;
+                    context = Context.Edit;
                     Event.current.Use();
                 }
             }
@@ -213,16 +186,16 @@ namespace Utility.SerializableCollection.Editor
             GUI.enabled = true;
 
             // Menu
-            
+
             var contextButtonsPosition = new Rect(
                 additionalHeaderRect.x + sizeFieldWidth + horizontalSpacing,
                 additionalHeaderRect.y,
                 AdditionalHeaderWidth - sizeFieldWidth - horizontalSpacing,
                 additionalHeaderRect.height);
 
-            
+
             GUIContent contextIcon;
-            switch (this.context)
+            switch (context)
             {
                 case Context.Edit:
                     contextIcon = EditorGUIUtility.IconContent("editicon.sml");
@@ -245,29 +218,29 @@ namespace Utility.SerializableCollection.Editor
                     contextButtonsPosition.y,
                     contextButtonsPosition.width,
                     contextButtonsPosition.height);
- 
+
                 var viewNames = new GUIContent[matrix2DViews.Count];
                 for (var i = 0; i < viewNames.Length; i++)
                     viewNames[i] = new GUIContent(matrix2DViews[i].ViewName);
 
                 selectedViewIndex = EditorGUI.Popup(
                     viewButtonsPosition, GUIContent.none, selectedViewIndex, viewNames);
-                 var viewIcon = new GUIContent(
-                     EditorGUIUtility.IconContent("ClothInspector.ViewValue").image,
-                     $"View: {matrix2DViews[selectedViewIndex].ViewName}"); 
+                var viewIcon = new GUIContent(
+                    EditorGUIUtility.IconContent("ClothInspector.ViewValue").image,
+                    $"View: {matrix2DViews[selectedViewIndex].ViewName}");
                 GUI.Button(viewButtonsPosition, viewIcon);
                 contextIcon.text = null;
             }
             else
-                contextIcon.text = $"   {this.context}";
-            
+                contextIcon.text = $"   {context}";
 
-            var context = (Context) EditorGUI.EnumPopup(contextButtonsPosition, GUIContent.none, this.context);
+
+            var contextPopup = (Context) EditorGUI.EnumPopup(contextButtonsPosition, GUIContent.none, this.context);
             GUI.Button(contextButtonsPosition, contextIcon);
-            if (context != this.context)
+            if (contextPopup != context)
             {
                 DeselectAll();
-                this.context = context;
+                context = contextPopup;
                 tempSize = MatrixSize;
                 Event.current.Use();
             }
@@ -354,18 +327,7 @@ namespace Utility.SerializableCollection.Editor
 
         protected abstract void DrawCollection();
 
-        protected abstract void UpdateState_BeforeDrawingCollection();
-
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            UpdateState_References(property);
-            UpdateState_Views(property);
-            InitializeViewBeforeDrawing(property);
-            
-            fieldsProperty = collectionProperty.FindPropertyRelative("fields");
-            UpdateState_BeforeGetPropertyHeight();
-            return GetFullHeight(property);
-        }
+        protected abstract void UpdateState_BeforeDrawingCollection(Rect contentRect);
 
         protected virtual void InitializeViewBeforeDrawing(SerializedProperty property){ }
 
@@ -376,9 +338,9 @@ namespace Utility.SerializableCollection.Editor
             ApplyToMultipleCells(area, (cell) => FirstSelectedProperty.CopyPropertyValueTo(cell));
             serializedUnityObject.ApplyModifiedProperties();
         }
-        protected sealed override SerializedProperty FirstSelectedProperty => GetCellProperty(FirstSelectedIndex);
+        protected SerializedProperty FirstSelectedProperty => GetCellProperty(FirstSelectedIndex);
 
-        protected sealed override SerializedProperty FirstProperty => GetCellProperty(MinimumIndex); 
+        protected SerializedProperty FirstProperty => GetCellProperty(MinimumIndex); 
         public abstract SerializedProperty GetCellProperty(TIndexVector index);
         protected abstract TIndexVector FirstSelectedIndex { get; }
         protected abstract TIndexVector MinimumIndex { get; }
@@ -402,16 +364,18 @@ namespace Utility.SerializableCollection.Editor
         }
 
         protected abstract string SelectedIndexText { get; }
+          
 
-        float GetFullHeight(SerializedProperty property)
-        {
-            const float headerH = (headerHeight + 2);
-            if (!IsExpanded) return headerH;
-
+        protected override float GetContentHeight(SerializedProperty property)
+        {   
+            UpdateState_Views(property);
+            InitializeViewBeforeDrawing(property);
+            fieldsProperty = collectionProperty.FindPropertyRelative("fields");
+            UpdateState_BeforeGetPropertyHeight();
+            
             float collectionH = CollectionHeight + 1;
             float selectedH = SelectedAny ? (selectedPropertyRect.height + 1) : 0;
-
-            return headerH + collectionH + selectedH + extraSpacingWhenOpen;
+            return collectionH + selectedH + extraSpacingWhenOpen;
         }
 
         protected abstract float CollectionHeight { get; }

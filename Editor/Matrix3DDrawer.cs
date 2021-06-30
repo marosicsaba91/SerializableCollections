@@ -113,7 +113,7 @@ namespace Utility.SerializableCollection.Editor
         }
         
         
-        protected sealed override int AdditionalHeaderWidth => 226; 
+        protected sealed override float AdditionalHeaderWidth => 226; 
  
         protected override void DrawCollection()
         {
@@ -127,12 +127,12 @@ namespace Utility.SerializableCollection.Editor
             //Debug.Log($"{selectedArea.min}  {selectedArea.max}  {selectedArea.size}");
         }
 
-        protected override void UpdateState_BeforeDrawingCollection()
+        protected override void UpdateState_BeforeDrawingCollection(Rect contentRect)
         {
             collectionRect = new Rect(
-                fullRect.x,
-                fullRect.y + headerHeight + 1,
-                fullRect.width,
+                contentRect.x,
+                contentRect.y,
+                contentRect.width,
                 matrixPanelSize);
         }
         
