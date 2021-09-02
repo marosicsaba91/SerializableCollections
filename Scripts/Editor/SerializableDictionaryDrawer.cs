@@ -2,8 +2,7 @@
 using MUtility;
 using UnityEditor;
 using UnityEngine;
-using Utility.SerializableCollection.Editor;
-using Object = System.Object;
+using Utility.SerializableCollection.Editor; 
 
 namespace Utility.SerializableCollection
 {
@@ -120,7 +119,7 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
             if (targetObject.ContainsKeyMoreThanOnce(index))
             {
                 var rowRect = new Rect(contentRect.x, y, contentRect.width, elementHeight);
-                EditorHelper.DrawBox(rowRect, EditorHelper.errorBackgroundColor, borderColor: null,  borderInside: false);
+                EditorHelper.DrawBox(rowRect, EditorHelper.ErrorBackgroundColor, borderColor: null,  borderInside: false);
             }
  
             if (GUI.Button(indexRect, index.ToString(), centerAlignment))

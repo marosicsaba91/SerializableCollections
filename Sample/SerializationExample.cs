@@ -26,7 +26,7 @@ public class SerializationExample : MonoBehaviour
     [SerializeField] Matrix2DVector3Int matrix2DVector3Int = default;
     [SerializeField] Matrix2DGameObject matrix2DGameObject = default;
     [SerializeField] Matrix2DTransform matrix2DTransform = default;
-    [SerializeField] Matrix2DTexture matrix2DTexture = default;
+    [SerializeField] Matrix2DTexture matrix2DTexture = default; 
     
     
     // Enum

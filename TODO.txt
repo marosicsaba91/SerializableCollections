@@ -1,0 +1,4 @@
+Serializable Dictionary:
+	Add new element doesn't work if Dictionary view is open.
+
+Make it respansive!
