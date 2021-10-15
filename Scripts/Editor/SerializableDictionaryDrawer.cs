@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using MUtility;
 using UnityEditor;
 using UnityEngine;
@@ -208,3 +209,4 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
     protected override bool IsExpandable => targetObject != null && targetObject.Count > 0;
 }
 }
+#endif
