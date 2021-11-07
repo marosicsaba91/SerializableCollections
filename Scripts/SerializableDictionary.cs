@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Utility.SerializableCollection
 {
+	[Serializable] 
 	public abstract class SerializableDictionary : IGenericCollection
 	{
 		public abstract Type ContainingType { get; }
@@ -16,6 +17,7 @@ namespace Utility.SerializableCollection
 		internal abstract KeyValuePair<object, object> GetKeyValuePairAt(int index);
 	}
 
+	[Serializable] 
 	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
 	{ 
 		[SerializeField] List<TKey> keys = default;

@@ -51,7 +51,9 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
         GUI.enabled = _selectedIndex >= 1 && _selectedIndex < _count; 
         if (GUI.Button(moveUpRect, EditorGUIUtility.IconContent("scrollup")))
             MoveElement(up: true);
-        
+
+        keysProperty.serializedObject.ApplyModifiedProperties();
+        valuesProperty.serializedObject.ApplyModifiedProperties();
         
         GUI.enabled = tempEnable;
         EditorGUI.LabelField(labelRect, $"Count: {targetObject.Count}" , rightAlignment);
@@ -106,9 +108,7 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
 
             Color? color = index%2 == 0 ?EditorHelper.tableEvenLineColor : (Color?) null;
             if (_selectedIndex == index)
-            { 
                 color = EditorHelper.tableSelectedColor;
-            }
 
             var indexRect = new Rect(indexX, y, indexWidth, elementHeight);
             var keyRect = new Rect(keyX, y, w, elementHeight);
@@ -120,7 +120,11 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
             if (targetObject.ContainsKeyMoreThanOnce(index))
             {
                 var rowRect = new Rect(contentRect.x, y, contentRect.width, elementHeight);
-                EditorHelper.DrawBox(rowRect, EditorHelper.ErrorBackgroundColor, borderColor: null,  borderInside: false);
+                Color errorColor = EditorHelper.ErrorBackgroundColor;
+                if (_selectedIndex == index)
+                    errorColor.a = 0.35f;
+
+                EditorHelper.DrawBox(rowRect, errorColor, borderColor: null, borderInside: false);
             }
  
             if (GUI.Button(indexRect, index.ToString(), centerAlignment))
