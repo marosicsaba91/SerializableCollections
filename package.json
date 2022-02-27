@@ -1,8 +1,9 @@
 {
-  "name": "com.marosi.serializablecollections",
-  "version": "0.1.1",
-  "displayName": "Serializable Collections",
-  "description": "Serializable Dictionaries and 2D Matrix",
+  "name": "com.marosi.serializable_collection",
+  "version": "1.2.0",
+  "displayName": "Serializable Collection",
+  "description": "Serializable Dictionary & 2D Matrixes",
   "unity": "2019.4",
-  "type": "library"
+  "type": "library",
+  "hideInEditor": false
 }

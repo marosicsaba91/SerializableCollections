@@ -20,8 +20,8 @@ namespace Utility.SerializableCollection
 	[Serializable] 
 	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
 	{ 
-		[SerializeField] List<TKey> keys = new List<TKey>();
-		[SerializeField] List<TValue> values = new List<TValue>();
+		[SerializeField] List<TKey> keys = default;
+		[SerializeField] List<TValue> values = default;
  
 		public ICollection<TKey> Keys => keys;
 		public ICollection<TValue> Values => values;
@@ -82,7 +82,11 @@ namespace Utility.SerializableCollection
 			get
 			{
 				if (keys == null || values == null || keys.Count != values.Count)
-				{ 
+				{
+					if (keys == null)
+						keys = new List<TKey>();
+					if (values == null)
+						values = new List<TValue>();
 					while (keys.Count > values.Count)
 						keys.RemoveAt(keys.Count-1);
 					while (keys.Count < values.Count)
