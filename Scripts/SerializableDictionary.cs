@@ -20,8 +20,8 @@ namespace Utility.SerializableCollection
 	[Serializable] 
 	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
 	{ 
-		[SerializeField] List<TKey> keys = default;
-		[SerializeField] List<TValue> values = default;
+		[SerializeField] List<TKey> keys = new List<TKey>();
+		[SerializeField] List<TValue> values = new List<TValue>();
  
 		public ICollection<TKey> Keys => keys;
 		public ICollection<TValue> Values => values;
