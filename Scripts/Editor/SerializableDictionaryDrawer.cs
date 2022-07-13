@@ -1,7 +1,9 @@
 ﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using MUtility;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using Utility.SerializableCollection.Editor; 
 
@@ -18,7 +20,7 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
     int _count = 1;
     
     protected override void UpdateReferences(SerializedProperty property)
-    { 
+    {
         keysProperty = collectionProperty.FindPropertyRelative("keys");
         valuesProperty = collectionProperty.FindPropertyRelative("values");
         _count = targetObject.Count;
@@ -27,12 +29,24 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
     protected override float AdditionalHeaderWidth => 180;
 
     protected override void DrawAdditionalHeader(Rect additionalHeaderRect)
-    {  
-        const float actionButtonWidth = 25;
-        float y = additionalHeaderRect.y+2;
-        float height = additionalHeaderRect.height-4;
+    {
+        if (keysProperty == null)
+        {
+            DrawError(additionalHeaderRect, "Not supported Key Type");
+            return;
+        }
 
-        var addRect = new Rect(additionalHeaderRect.xMax - actionButtonWidth-2, y, actionButtonWidth, height);
+        if (valuesProperty == null)
+        {
+            DrawError(additionalHeaderRect, "Not supported Value Type");
+            return;
+        }
+
+        const float actionButtonWidth = 25;
+        float y = additionalHeaderRect.y + 2;
+        float height = additionalHeaderRect.height - 4;
+
+        var addRect = new Rect(additionalHeaderRect.xMax - actionButtonWidth - 2, y, actionButtonWidth, height);
         var deleteRect = new Rect(addRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
         var moveDownRect = new Rect(deleteRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
         var moveUpRect = new Rect(moveDownRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
@@ -45,20 +59,20 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
         GUI.enabled = _selectedIndex >= 0 && _selectedIndex < _count;
         if (GUI.Button(deleteRect, EditorGUIUtility.IconContent("winbtn_win_close_a")))
             RemoveElement();
-        GUI.enabled = _selectedIndex >= 0 && _selectedIndex < _count-1;
+        GUI.enabled = _selectedIndex >= 0 && _selectedIndex < _count - 1;
         if (GUI.Button(moveDownRect, EditorGUIUtility.IconContent("scrolldown")))
             MoveElement(up: false);
-        GUI.enabled = _selectedIndex >= 1 && _selectedIndex < _count; 
+        GUI.enabled = _selectedIndex >= 1 && _selectedIndex < _count;
         if (GUI.Button(moveUpRect, EditorGUIUtility.IconContent("scrollup")))
             MoveElement(up: true);
 
         keysProperty.serializedObject.ApplyModifiedProperties();
         valuesProperty.serializedObject.ApplyModifiedProperties();
-        
-        GUI.enabled = tempEnable;
-        EditorGUI.LabelField(labelRect, $"Count: {targetObject.Count}" , rightAlignment);
-    }
 
+        GUI.enabled = tempEnable;
+        EditorGUI.LabelField(labelRect, $"Count: {targetObject.Count}", rightAlignment);
+    }
+    
     void RemoveElement()
     { 
         keysProperty.DeleteArrayElementAtIndex(_selectedIndex);
@@ -99,24 +113,24 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
         float tempLabelWidth = EditorGUIUtility.labelWidth;
         EditorGUIUtility.labelWidth *= 0.5f;
 
-        var index = 0; 
-        
+        var index = 0;
+
         foreach (PropertyKeyValuePair element in GetElementProperties())
         {
             float elementHeight = element.height + n;
 
 
-            Color? color = index%2 == 0 ?EditorHelper.tableEvenLineColor : (Color?) null;
+            Color? color = index % 2 == 0 ? EditorHelper.tableEvenLineColor : (Color?)null;
             if (_selectedIndex == index)
                 color = EditorHelper.tableSelectedColor;
 
             var indexRect = new Rect(indexX, y, indexWidth, elementHeight);
             var keyRect = new Rect(keyX, y, w, elementHeight);
-            var valueRect = new Rect(keyRect.xMax, y, contentRect.xMax-keyRect.xMax, elementHeight);
-            EditorHelper.DrawBox(indexRect, color,borderColor: null,  borderInside: false);
-            EditorHelper.DrawBox(keyRect,color,borderColor: null,  borderInside: false);
-            EditorHelper.DrawBox(valueRect, color,borderColor: null, borderInside: false);
- 
+            var valueRect = new Rect(keyRect.xMax, y, contentRect.xMax - keyRect.xMax, elementHeight);
+            EditorHelper.DrawBox(indexRect, color, borderColor: null, borderInside: false);
+            EditorHelper.DrawBox(keyRect, color, borderColor: null, borderInside: false);
+            EditorHelper.DrawBox(valueRect, color, borderColor: null, borderInside: false);
+
             if (targetObject.ContainsKeyMoreThanOnce(index))
             {
                 var rowRect = new Rect(contentRect.x, y, contentRect.width, elementHeight);
@@ -126,19 +140,25 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
 
                 EditorHelper.DrawBox(rowRect, errorColor, borderColor: null, borderInside: false);
             }
- 
+
             if (GUI.Button(indexRect, index.ToString(), centerAlignment))
                 _selectedIndex = index == _selectedIndex ? -1 : index;
 
             keyRect = Margin(keyRect, margin: 1, element.keyHeight, element.keyProperty.IsExpandable());
             valueRect = Margin(valueRect, margin: 1, element.valueHeight, element.valueProperty.IsExpandable());
-            GUIContent keyContent = element.keyProperty.IsExpandable() ? new GUIContent(element.key.ToString()) : GUIContent.none;
-            GUIContent valueContent = element.valueProperty.IsExpandable() ? new GUIContent(element.value.ToString()) : GUIContent.none;
+
+            GUIContent keyContent = element.keyProperty.IsExpandable()
+                ? new GUIContent(element.key == null ? "null" : element.key.ToString())
+                : GUIContent.none;
+            GUIContent valueContent = element.valueProperty.IsExpandable()
+                ? new GUIContent(element.value == null ? "null" : element.value.ToString())
+                : GUIContent.none;
+
             EditorGUI.PropertyField(keyRect, element.keyProperty, keyContent, includeChildren: true);
             EditorGUI.PropertyField(valueRect, element.valueProperty, valueContent, includeChildren: true);
 
             y += elementHeight;
-            index++; 
+            index++;
         }
 
         EditorGUIUtility.labelWidth = tempLabelWidth;
@@ -161,14 +181,28 @@ public class SerializableDictionaryDrawer : CollectionDrawer<SerializableDiction
         }
     }
 
+    void DrawError(Rect position, string message)
+    { 
+        GUIContent content = EditorGUIUtility.IconContent("console.erroricon.sml");
+        content.text = message;
+
+        GUIStyle style = new GUIStyle(EditorStyles.helpBox) { }; 
+        GUI.Label(position, content, style); 
+    }
+
     protected override float GetContentHeight(SerializedProperty property)
     {
         if (!property.isExpanded) return 0;
-        
+
+        if (keysProperty == null)
+            return singleLineHeight;
+        if (valuesProperty == null)
+            return singleLineHeight;
+
         float fullHeight = 0;
 
         foreach (PropertyKeyValuePair element in GetElementProperties())
-        { 
+        {
             fullHeight += element.height;
             fullHeight += n;
         }
