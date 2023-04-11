@@ -32,6 +32,44 @@ namespace Utility.SerializableCollection
 				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
 		}
 
+		static List<TKey> _sortList;
+		
+		public void SortByKey()
+		{
+			Comparison<TKey> comparison = Comparer<TKey>.Default.Compare;
+			SortByKey(comparison);
+		}
+		
+		public void SortByKey(Comparison<TKey> comparison)
+		{
+			if (_sortList == null)
+				_sortList = new List<TKey>();
+			else
+				_sortList.Clear();
+			
+			// Copy
+			foreach (TKey t in keys)
+				_sortList.Add(t);
+
+			// Sort
+			_sortList.Sort(comparison);
+
+			
+			for (int i = 0; i < keys.Count; i++)
+			{
+				TKey key = _sortList[i];
+				int oldIndex = keys.IndexOf(key);
+				if (oldIndex != i)
+				{
+					TValue val = values[oldIndex];
+					keys.RemoveAt(oldIndex);
+					values.RemoveAt(oldIndex);
+					keys.Insert(i, key);
+					values.Insert(i, val);
+				}
+			}
+		}
+
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 		public void Add(KeyValuePair<TKey, TValue> item)
