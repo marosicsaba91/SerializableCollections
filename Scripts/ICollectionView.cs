@@ -1,7 +1,7 @@
-﻿﻿namespace Utility.SerializableCollection
+﻿namespace Utility.SerializableCollection
 {
-    public interface ICollectionView
-    {
-        string ViewName { get; }
-    }
+	public interface ICollectionView
+	{
+		string ViewName { get; }
+	}
 }

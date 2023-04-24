@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Utility.SerializableCollection
 {
-	[Serializable] 
+	[Serializable]
 	public abstract class SerializableDictionary : IGenericCollection
 	{
 		public abstract Type ContainingType { get; }
@@ -17,36 +17,36 @@ namespace Utility.SerializableCollection
 		internal abstract KeyValuePair<object, object> GetKeyValuePairAt(int index);
 	}
 
-	[Serializable] 
+	[Serializable]
 	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
-	{ 
+	{
 		[SerializeField] List<TKey> keys = new List<TKey>();
 		[SerializeField] List<TValue> values = new List<TValue>();
- 
+
 		public ICollection<TKey> Keys => keys;
 		public ICollection<TValue> Values => values;
-		  
+
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
-			for (var i = 0; i < keys.Count; i++)
+			for (int i = 0; i < keys.Count; i++)
 				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
 		}
 
 		static List<TKey> _sortList;
-		
+
 		public void SortByKey()
 		{
 			Comparison<TKey> comparison = Comparer<TKey>.Default.Compare;
 			SortByKey(comparison);
 		}
-		
+
 		public void SortByKey(Comparison<TKey> comparison)
 		{
 			if (_sortList == null)
 				_sortList = new List<TKey>();
 			else
 				_sortList.Clear();
-			
+
 			// Copy
 			foreach (TKey t in keys)
 				_sortList.Add(t);
@@ -54,7 +54,7 @@ namespace Utility.SerializableCollection
 			// Sort
 			_sortList.Sort(comparison);
 
-			
+
 			for (int i = 0; i < keys.Count; i++)
 			{
 				TKey key = _sortList[i];
@@ -80,9 +80,9 @@ namespace Utility.SerializableCollection
 			values.Add(item.Value);
 		}
 
-		public void Add(TKey key, TValue value) => 
+		public void Add(TKey key, TValue value) =>
 			Add(new KeyValuePair<TKey, TValue>(key, value));
-		
+
 		public void Clear()
 		{
 			keys.Clear();
@@ -92,22 +92,25 @@ namespace Utility.SerializableCollection
 		public bool Contains(KeyValuePair<TKey, TValue> item)
 		{
 			int index = keys.IndexOf(item.Key);
-			if (index < 0) return false;
+			if (index < 0)
+				return false;
 			return values[index].Equals(item.Value);
 		}
 
 		public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
 		{
-			for (int i = 0; i < array.Length && i+arrayIndex< keys.Count; i++) 
-				array[i] = new KeyValuePair<TKey, TValue>(keys[i+arrayIndex], values[i+arrayIndex]);
+			for (int i = 0; i < array.Length && i + arrayIndex < keys.Count; i++)
+				array[i] = new KeyValuePair<TKey, TValue>(keys[i + arrayIndex], values[i + arrayIndex]);
 		}
 
 		public bool Remove(KeyValuePair<TKey, TValue> item)
 		{
 			int index = keys.IndexOf(item.Key);
-			if (index < 0) return false;
-			if (values[index].Equals(item.Value)) return false;
-			
+			if (index < 0)
+				return false;
+			if (values[index].Equals(item.Value))
+				return false;
+
 			keys.RemoveAt(index);
 			values.RemoveAt(index);
 			return true;
@@ -126,9 +129,9 @@ namespace Utility.SerializableCollection
 					if (values == null)
 						values = new List<TValue>();
 					while (keys.Count > values.Count)
-						keys.RemoveAt(keys.Count-1);
+						keys.RemoveAt(keys.Count - 1);
 					while (keys.Count < values.Count)
-						values.RemoveAt(values.Count-1);
+						values.RemoveAt(values.Count - 1);
 				}
 
 				return keys.Count;
@@ -137,11 +140,12 @@ namespace Utility.SerializableCollection
 
 		internal override bool ContainsKeyMoreThanOnce(int index)
 		{
-			if (index < 0 || index >= keys.Count) return false;
+			if (index < 0 || index >= keys.Count)
+				return false;
 			TKey test = keys[index];
-			for (var i = 0; i < keys.Count; i++)
+			for (int i = 0; i < keys.Count; i++)
 			{
-				if(i == index)
+				if (i == index)
 					continue;
 				if (Equals(keys[i], test))
 					return true;
@@ -150,18 +154,19 @@ namespace Utility.SerializableCollection
 			return false;
 		}
 
-		internal override KeyValuePair<object, object> GetKeyValuePairAt(int index) => 
+		internal override KeyValuePair<object, object> GetKeyValuePairAt(int index) =>
 			new KeyValuePair<object, object>(keys[index], values[index]);
 
 		public bool IsReadOnly => false;
 
-		public bool ContainsKey(TKey key) => keys.Contains(key); 
-		
+		public bool ContainsKey(TKey key) => keys.Contains(key);
+
 		public bool Remove(TKey key)
 		{
 			int index = keys.IndexOf(key);
-			if (index < 0) return false; 
-			
+			if (index < 0)
+				return false;
+
 			keys.RemoveAt(index);
 			values.RemoveAt(index);
 			return true;
@@ -179,6 +184,6 @@ namespace Utility.SerializableCollection
 		{
 			get => values[keys.IndexOf(key)];
 			set => values[keys.IndexOf(key)] = value;
-		} 
+		}
 	}
 }
