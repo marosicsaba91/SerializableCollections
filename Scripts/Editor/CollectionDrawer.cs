@@ -19,26 +19,26 @@ namespace Utility.SerializableCollection.Editor
 		protected static readonly Color selectionColor = Color.white;
 		protected static readonly Color copyColor = Color.black;
 
-		protected static readonly GUIStyle foldoutButtonStyle = new GUIStyle();
+		protected static readonly GUIStyle foldoutButtonStyle = new();
 
-		protected static readonly GUIStyle centerAlignment = new GUIStyle(GUI.skin.label)
+		protected static readonly GUIStyle centerAlignment = new(GUI.skin.label)
 		{
 			alignment = TextAnchor.MiddleCenter
 		};
 
-		protected static readonly GUIStyle rightAlignment = new GUIStyle(GUI.skin.label)
+		protected static readonly GUIStyle rightAlignment = new(GUI.skin.label)
 		{
 			alignment = TextAnchor.MiddleRight
 		};
 
-		protected static readonly GUIStyle errorTextStyle = new GUIStyle(GUI.skin.label)
+		protected static readonly GUIStyle errorTextStyle = new(GUI.skin.label)
 		{
 			fontSize = 11,
 			alignment = TextAnchor.MiddleRight,
 			normal = new GUIStyleState { textColor = EditorHelper.ErrorRedColor }
 		};
 
-		protected static readonly GUIStyle infoTextStyle = new GUIStyle(GUI.skin.label)
+		protected static readonly GUIStyle infoTextStyle = new(GUI.skin.label)
 		{
 			fontSize = 11,
 			alignment = TextAnchor.MiddleRight,
