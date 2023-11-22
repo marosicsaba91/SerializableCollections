@@ -1,7 +1,9 @@
 {
     "name": "Marosi.SerializableCollections",
+    "rootNamespace": "",
     "references": [
-        "GUID:8c8c0e118c65fb143abfbcdb8ea42f51"
+        "GUID:8c8c0e118c65fb143abfbcdb8ea42f51",
+        "GUID:e49005f8dd11ec442852312d28c83c52"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

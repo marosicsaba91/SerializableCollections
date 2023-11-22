@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
-using MUtility;
+using EasyInspector;
 using UnityEditor;
 using UnityEngine;
 using Utility.SerializableCollection.Editor;
@@ -44,11 +44,11 @@ namespace Utility.SerializableCollection
 			float y = additionalHeaderRect.y + 2;
 			float height = additionalHeaderRect.height - 4;
 
-			var addRect = new Rect(additionalHeaderRect.xMax - actionButtonWidth - 2, y, actionButtonWidth, height);
-			var deleteRect = new Rect(addRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
-			var moveDownRect = new Rect(deleteRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
-			var moveUpRect = new Rect(moveDownRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
-			var labelRect = new Rect(additionalHeaderRect.x, y, moveUpRect.x - 5 - additionalHeaderRect.x, height);
+			Rect addRect = new(additionalHeaderRect.xMax - actionButtonWidth - 2, y, actionButtonWidth, height);
+			Rect deleteRect = new(addRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
+			Rect moveDownRect = new(deleteRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
+			Rect moveUpRect = new(moveDownRect.x - actionButtonWidth - 1, y, actionButtonWidth, height);
+			Rect labelRect = new(additionalHeaderRect.x, y, moveUpRect.x - 5 - additionalHeaderRect.x, height);
 
 			bool tempEnable = GUI.enabled;
 
@@ -122,16 +122,16 @@ namespace Utility.SerializableCollection
 				if (_selectedIndex == index)
 					color = EditorHelper.tableSelectedColor;
 
-				var indexRect = new Rect(indexX, y, indexWidth, elementHeight);
-				var keyRect = new Rect(keyX, y, w, elementHeight);
-				var valueRect = new Rect(keyRect.xMax, y, contentRect.xMax - keyRect.xMax, elementHeight);
+				Rect indexRect = new(indexX, y, indexWidth, elementHeight);
+				Rect keyRect = new(keyX, y, w, elementHeight);
+				Rect valueRect = new(keyRect.xMax, y, contentRect.xMax - keyRect.xMax, elementHeight);
 				EditorHelper.DrawBox(indexRect, color, borderColor: null, borderInside: false);
 				EditorHelper.DrawBox(keyRect, color, borderColor: null, borderInside: false);
 				EditorHelper.DrawBox(valueRect, color, borderColor: null, borderInside: false);
 
 				if (targetObject.ContainsKeyMoreThanOnce(index))
 				{
-					var rowRect = new Rect(contentRect.x, y, contentRect.width, elementHeight);
+					Rect rowRect = new(contentRect.x, y, contentRect.width, elementHeight);
 					Color errorColor = EditorHelper.ErrorBackgroundColor;
 					if (_selectedIndex == index)
 						errorColor.a = 0.35f;
@@ -166,7 +166,7 @@ namespace Utility.SerializableCollection
 				float height = Mathf.Min(maxHeight, rect.height - (2 * margin));
 				float centeredY = rect.center.y - (height / 2);
 
-				var result = new Rect(rect.x + margin, centeredY, rect.width - 2 * margin, height);
+				Rect result = new(rect.x + margin, centeredY, rect.width - 2 * margin, height);
 
 				if (isExpandable)
 				{
@@ -184,7 +184,7 @@ namespace Utility.SerializableCollection
 			GUIContent content = EditorGUIUtility.IconContent("console.erroricon.sml");
 			content.text = message;
 
-			GUIStyle style = new GUIStyle(EditorStyles.helpBox) { };
+			GUIStyle style = new(EditorStyles.helpBox) { };
 			GUI.Label(position, content, style);
 		}
 

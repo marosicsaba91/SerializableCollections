@@ -47,9 +47,9 @@ namespace Utility.SerializableCollection.Editor
 
 	public static class HeatMapHelper
 	{
-		static readonly Color minColor = new Color(0.94f, 0.86f, 0.58f);
-		static readonly Color middleColor = new Color(0.92f, 0.66f, 0.4f);
-		static readonly Color maxColor = new Color(0.79f, 0.34f, 0.31f);
+		static readonly Color minColor = new(0.94f, 0.86f, 0.58f);
+		static readonly Color middleColor = new(0.92f, 0.66f, 0.4f);
+		static readonly Color maxColor = new(0.79f, 0.34f, 0.31f);
 
 		public static Color GetColor(float value, float min, float max) =>
 			GetColor(value, min, max, minColor, middleColor, maxColor);
@@ -151,7 +151,7 @@ namespace Utility.SerializableCollection.Editor
 			if (texture == null)
 				return;
 
-			var size = new Vector2(texture.width, texture.height);
+			Vector2 size = new(texture.width, texture.height);
 			EditorGUI.DrawPreviewTexture(Crop(position, size), texture, SpriteMaterial);
 		}
 

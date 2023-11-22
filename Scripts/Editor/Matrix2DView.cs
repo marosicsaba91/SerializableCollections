@@ -40,14 +40,14 @@ namespace Utility.SerializableCollection.Editor
 			fieldsProperty = drawer.FieldsProperty;
 		}
 
-		protected readonly GUIStyle centerAlignment = new GUIStyle(GUI.skin.label)
+		protected readonly GUIStyle centerAlignment = new(GUI.skin.label)
 		{
 			alignment = TextAnchor.MiddleCenter
 		};
 
 		public sealed override void DrawCell(Rect position, int x, int y)
 		{
-			var element = (TContainingType)targetMatrix2D.GetElement(x, y);
+			TContainingType element = (TContainingType)targetMatrix2D.GetElement(x, y);
 			DrawCell(position, x, y, element);
 		}
 

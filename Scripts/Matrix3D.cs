@@ -15,7 +15,7 @@ namespace Utility.SerializableCollection
 
 		public Vector3Int Size
 		{
-			get => new Vector3Int(Width, Height, Depth);
+			get => new(Width, Height, Depth);
 			set
 			{
 				Width = value.x;
@@ -37,7 +37,7 @@ namespace Utility.SerializableCollection
 	public abstract class Matrix3D<T> : Matrix3DBase, IEnumerable<T>
 	{
 		// Used only in Inspector, DON'T MODIFY!!! 
-		[SerializeField] List<T> fields = new List<T>() { default };
+		[SerializeField] List<T> fields = new() { default };
 		[SerializeField] int width = 1;
 		[SerializeField] int height = 1;
 		// Used only in Inspector, DON'T DELETE!!!

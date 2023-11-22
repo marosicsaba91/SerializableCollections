@@ -20,8 +20,8 @@ namespace Utility.SerializableCollection
 	[Serializable]
 	public class SerializableDictionary<TKey, TValue> : SerializableDictionary, IDictionary<TKey, TValue>
 	{
-		[SerializeField] List<TKey> keys = new List<TKey>();
-		[SerializeField] List<TValue> values = new List<TValue>();
+		[SerializeField] List<TKey> keys = new();
+		[SerializeField] List<TValue> values = new();
 
 		public ICollection<TKey> Keys => keys;
 		public ICollection<TValue> Values => values;
@@ -155,7 +155,7 @@ namespace Utility.SerializableCollection
 		}
 
 		internal override KeyValuePair<object, object> GetKeyValuePairAt(int index) =>
-			new KeyValuePair<object, object>(keys[index], values[index]);
+			new(keys[index], values[index]);
 
 		public bool IsReadOnly => false;
 

@@ -14,7 +14,7 @@ namespace Utility.SerializableCollection
 
 		public Vector2Int Size
 		{
-			get => new Vector2Int(Width, Height);
+			get => new(Width, Height);
 			set
 			{
 				Width = value.x;
@@ -50,7 +50,7 @@ namespace Utility.SerializableCollection
 	public abstract class Matrix2D<T> : Matrix2DBase, IEnumerable<T>
 	{
 		// Used only in Inspector, DON'T RENAME, DON'T MODIFY !!! 
-		[SerializeField] List<T> fields = new List<T>() { default };
+		[SerializeField] List<T> fields = new() { default };
 		[SerializeField] int width = 1;
 		// Warning ended
 

@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using EasyInspector;
 using MUtility;
 using UnityEditor;
 using UnityEngine;
@@ -40,7 +41,7 @@ namespace Utility.SerializableCollection.Editor
 		protected Vector2Int mouseDownCoord;
 
 		protected TView defaultView;
-		protected readonly List<TView> matrix2DViews = new List<TView>();
+		protected readonly List<TView> matrix2DViews = new();
 		protected int selectedViewIndex = 0;
 
 		// Properties
@@ -158,7 +159,7 @@ namespace Utility.SerializableCollection.Editor
 			// Matrix Size
 			bool resize = this.context == Context.Resize;
 
-			var sizeLabelPosition = new Rect(
+			Rect sizeLabelPosition = new(
 				additionalHeaderRect.x,
 				additionalHeaderRect.y + 2,
 				resize ? sizeFieldWidth - okButtonWidth : sizeFieldWidth,
@@ -172,7 +173,7 @@ namespace Utility.SerializableCollection.Editor
 
 			if (resize)
 			{
-				var okButtonRect = new Rect(
+				Rect okButtonRect = new(
 					sizeLabelPosition.x + sizeLabelPosition.width + horizontalSpacing,
 					sizeLabelPosition.y,
 					okButtonWidth - horizontalSpacing,
@@ -190,7 +191,7 @@ namespace Utility.SerializableCollection.Editor
 
 			// Menu
 
-			var contextButtonsPosition = new Rect(
+			Rect contextButtonsPosition = new(
 				additionalHeaderRect.x + sizeFieldWidth + horizontalSpacing,
 				additionalHeaderRect.y,
 				AdditionalHeaderWidth - sizeFieldWidth - horizontalSpacing,
@@ -216,19 +217,19 @@ namespace Utility.SerializableCollection.Editor
 			if (matrix2DViews.Count > 0)
 			{
 				contextButtonsPosition.width = (contextButtonsPosition.width - horizontalSpacing) / 2;
-				var viewButtonsPosition = new Rect(
+				Rect viewButtonsPosition = new(
 					contextButtonsPosition.x + contextButtonsPosition.width + horizontalSpacing,
 					contextButtonsPosition.y,
 					contextButtonsPosition.width,
 					contextButtonsPosition.height);
 
-				var viewNames = new GUIContent[matrix2DViews.Count];
+				GUIContent[] viewNames = new GUIContent[matrix2DViews.Count];
 				for (int i = 0; i < viewNames.Length; i++)
 					viewNames[i] = new GUIContent(matrix2DViews[i].ViewName);
 
 				selectedViewIndex = EditorGUI.Popup(
 					viewButtonsPosition, GUIContent.none, selectedViewIndex, viewNames);
-				var viewIcon = new GUIContent(
+				GUIContent viewIcon = new(
 					EditorGUIUtility.IconContent("ClothInspector.ViewValue").image,
 					$"View: {matrix2DViews[selectedViewIndex].ViewName}");
 				GUI.Button(viewButtonsPosition, viewIcon);
@@ -238,7 +239,7 @@ namespace Utility.SerializableCollection.Editor
 				contextIcon.text = $"   {context}";
 
 
-			var contextPopup = (Context)EditorGUI.EnumPopup(contextButtonsPosition, GUIContent.none, this.context);
+			Context contextPopup = (Context)EditorGUI.EnumPopup(contextButtonsPosition, GUIContent.none, this.context);
 			GUI.Button(contextButtonsPosition, contextIcon);
 			if (contextPopup != context)
 			{

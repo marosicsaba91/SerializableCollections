@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
+using EasyInspector;
 using MUtility;
 using UnityEditor;
 using UnityEngine;
@@ -38,7 +39,7 @@ namespace Utility.SerializableCollection.Editor
 						yield return GetFieldProperty(x, y, z);
 		}
 
-		protected override BoundsInt FullArea => new BoundsInt(
+		protected override BoundsInt FullArea => new(
 			0, 0, 0,
 			_matrixWidth, _matrixHeight, _matrixDepth);
 
@@ -53,7 +54,7 @@ namespace Utility.SerializableCollection.Editor
 
 		protected override void SelectAll()
 		{
-			var all = new BoundsInt(0, 0, 0, _matrixWidth, _matrixHeight, _matrixDepth);
+			BoundsInt all = new(0, 0, 0, _matrixWidth, _matrixHeight, _matrixDepth);
 			selectedArea = selectedArea.Equals(all) ? new BoundsInt(0, 0, 0, 0, 0, 0) : all;
 		}
 
@@ -86,13 +87,13 @@ namespace Utility.SerializableCollection.Editor
 				for (int y = 0; y < destination.size.y; y++)
 					for (int z = 0; z < destination.size.y; z++)
 					{
-						var sourceCoordinate = new Vector3Int(x, y, z);
+						Vector3Int sourceCoordinate = new(x, y, z);
 						sourceCoordinate = MathHelper.Mod(sourceCoordinate, source.size.x, source.size.y, source.size.z);
 						sourceCoordinate.x += source.x;
 						sourceCoordinate.y += source.y;
 						sourceCoordinate.z += source.z;
 
-						var destinationCoordinate = new Vector3Int(
+						Vector3Int destinationCoordinate = new(
 							destination.position.x + x,
 							destination.position.y + y,
 							destination.position.y + z);

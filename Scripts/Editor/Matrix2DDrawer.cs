@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using EasyInspector;
 
 namespace Utility.SerializableCollection.Editor
 {
@@ -39,7 +40,7 @@ namespace Utility.SerializableCollection.Editor
 			? defaultView
 			: matrix2DViews[Mathf.Clamp(selectedViewIndex, min: 0, matrix2DViews.Count - 1)];
 
-		protected sealed override RectInt FullArea => new RectInt(xMin: 0, yMin: 0, _matrixWidth, _matrixHeight);
+		protected sealed override RectInt FullArea => new(xMin: 0, yMin: 0, _matrixWidth, _matrixHeight);
 		protected sealed override Vector2Int MinimumIndex => Vector2Int.zero;
 		protected sealed override Vector2Int FirstSelectedIndex => selectedArea.min;
 		protected sealed override bool SelectedAny => selectedArea.width > 0 && selectedArea.height > 0;
@@ -69,10 +70,10 @@ namespace Utility.SerializableCollection.Editor
 			defaultView.Init(this);
 
 			matrix2DViews.Clear();
-			var viewClassNames = new HashSet<string>();
+			HashSet<string> viewClassNames = new();
 
 			// Search for views based on Field attributes
-			var fieldAttribute = attribute as SetMatrix2DViewAttribute;
+			SetMatrix2DViewAttribute fieldAttribute = attribute as SetMatrix2DViewAttribute;
 			string[] fieldViewNames = fieldAttribute == null ? new string[0] : fieldAttribute.DrawerTypeNames;
 
 			foreach (string fieldViewName in fieldViewNames)
@@ -108,7 +109,7 @@ namespace Utility.SerializableCollection.Editor
 					continue;
 				}
 
-				var viewInstance = (Matrix2DViewBase)Activator.CreateInstance(type);
+				Matrix2DViewBase viewInstance = (Matrix2DViewBase)Activator.CreateInstance(type);
 				if (viewInstance == null)
 				{
 					Debug.LogWarning($"Can't Instantiate Type {viewClassName}");
@@ -262,17 +263,17 @@ namespace Utility.SerializableCollection.Editor
 			if (!collectionRect.Contains(position))
 				return new MouseInfo();
 
-			var inGridRelativePos =
-				new Vector2(
+			Vector2 inGridRelativePos =
+				new(
 					(position.x - collectionRect.x - _marginLeftWidth) / _cellWidth,
 					(position.y - collectionRect.y - _marginTopHeight) / _cellHeight
 				);
 
-			var cellIndex = new Vector2Int(
+			Vector2Int cellIndex = new(
 				inGridRelativePos.x < 0 ? -1 : (int)inGridRelativePos.x,
 				inGridRelativePos.y < 0 ? -1 : (int)inGridRelativePos.y);
 
-			var inCellRelativePos = new Vector2(
+			Vector2 inCellRelativePos = new(
 				inGridRelativePos.x < 0
 					? (position.x - collectionRect.x) / _marginLeftWidth
 					: inGridRelativePos.x % 1,
@@ -310,13 +311,13 @@ namespace Utility.SerializableCollection.Editor
 			if (mouseInfo.right)
 				copiedArea = HandleSelecting(mouseInfo.cellIndex, copiedArea);
 
-			var minPos = new Vector2Int(
+			Vector2Int minPos = new(
 				Mathf.Max(a: 0, mouseInfo.cellIndex.x - copiedArea.size.x + 1),
 				Mathf.Max(a: 0, mouseInfo.cellIndex.y - copiedArea.size.y + 1));
-			var maxPos = new Vector2Int(
+			Vector2Int maxPos = new(
 				mouseInfo.cellIndex.x + 1,
 				mouseInfo.cellIndex.y + 1);
-			var paintArea = new RectInt(minPos, maxPos - minPos);
+			RectInt paintArea = new(minPos, maxPos - minPos);
 
 			DrawCellSelection(selectionColor, paintArea, inside: true);
 
@@ -391,7 +392,7 @@ namespace Utility.SerializableCollection.Editor
 
 		protected sealed override void SelectAll()
 		{
-			var all = new RectInt(xMin: 0, yMin: 0, _matrixWidth, _matrixHeight);
+			RectInt all = new(xMin: 0, yMin: 0, _matrixWidth, _matrixHeight);
 			selectedArea = selectedArea.Equals(all) ? new RectInt(xMin: 0, yMin: 0, width: 0, height: 0) : all;
 		}
 
@@ -449,12 +450,12 @@ namespace Utility.SerializableCollection.Editor
 			for (int x = 0; x < destination.size.x; x++)
 				for (int y = 0; y < destination.size.y; y++)
 				{
-					var sourceCoordinate = new Vector2Int(x, y);
+					Vector2Int sourceCoordinate = new(x, y);
 					sourceCoordinate = MathHelper.Mod(sourceCoordinate, source.size.x, source.size.y);
 					sourceCoordinate.x += source.x;
 					sourceCoordinate.y += source.y;
 
-					var destinationCoordinate = new Vector2Int(
+					Vector2Int destinationCoordinate = new(
 						destination.position.x + x,
 						destination.position.y + y);
 
@@ -548,7 +549,7 @@ namespace Utility.SerializableCollection.Editor
 
 			const float width = selectionBorderWidth;
 
-			var rect = new Rect(
+			Rect rect = new(
 				collectionRect.x + _marginLeftWidth + (minX * _cellWidth),
 				collectionRect.y + _marginTopHeight + (afterY * _cellHeight) - (width / 2),
 				_cellWidth * (1 + maxX - minX), width);
@@ -563,7 +564,7 @@ namespace Utility.SerializableCollection.Editor
 
 			const float width = selectionBorderWidth;
 
-			var rect = new Rect(
+			Rect rect = new(
 				collectionRect.x + _marginLeftWidth + (afterX * _cellWidth) - (width / 2),
 				collectionRect.y + _marginTopHeight + (minY * _cellHeight),
 				width, _cellHeight * (1 + maxY - minY));
@@ -578,7 +579,7 @@ namespace Utility.SerializableCollection.Editor
 				EditorGUI.LabelField(rect, CurrentView.HorizontalHeaderText(x), centerAlignment);
 		}
 
-		Rect GetTopMarginCellRect(int x) => new Rect(
+		Rect GetTopMarginCellRect(int x) => new(
 			collectionRect.x + _marginLeftWidth + (x * _cellWidth),
 			collectionRect.y,
 			_cellWidth,
@@ -586,14 +587,14 @@ namespace Utility.SerializableCollection.Editor
 
 		readonly GUIContent _insertGuiContent = EditorGUIUtility.IconContent("Toolbar Plus");
 		readonly GUIContent _removeGuiContent = EditorGUIUtility.IconContent("Toolbar Minus");
-		readonly Color _removeColor = new Color(r: 1f, g: 0.47f, b: 0.41f);
+		readonly Color _removeColor = new(r: 1f, g: 0.47f, b: 0.41f);
 		void DrawColumnActionButtons(int x, float inCellX, Rect rect)
 		{
 			float size = rect.height / 2;
 
 			bool left = inCellX < 0.5f;
 			int insertX = left ? x : x + 1;
-			var insertRect = new Rect(
+			Rect insertRect = new(
 				(left ? rect.x : rect.xMax) - (size / 2),
 				rect.y + size,
 				size,
@@ -609,7 +610,7 @@ namespace Utility.SerializableCollection.Editor
 			GUI.Label(insertRect, _insertGuiContent);
 
 			GUI.color = _removeColor;
-			var removeRect = new Rect(rect.center.x - (size / 2), rect.y, size, size);
+			Rect removeRect = new(rect.center.x - (size / 2), rect.y, size, size);
 			if (GUI.Button(removeRect, GUIContent.none))
 			{
 				RecordForUndo("Remove Column");
@@ -629,7 +630,7 @@ namespace Utility.SerializableCollection.Editor
 			}
 		}
 
-		Rect GetLeftMarginCellRect(int y) => new Rect(
+		Rect GetLeftMarginCellRect(int y) => new(
 			collectionRect.x,
 			collectionRect.y + _marginTopHeight + (y * _cellHeight),
 			_marginLeftWidth,
@@ -641,7 +642,7 @@ namespace Utility.SerializableCollection.Editor
 
 			bool top = inCellY < 0.5f;
 			int insertY = top ? y : y + 1;
-			var insertRect = new Rect(
+			Rect insertRect = new(
 				rect.x + size,
 				(top ? rect.y : rect.yMax) - (size / 2),
 				size,
@@ -657,7 +658,7 @@ namespace Utility.SerializableCollection.Editor
 			GUI.Label(insertRect, _insertGuiContent);
 
 			GUI.color = _removeColor;
-			var removeRect = new Rect(rect.x, rect.center.y - (size / 2), size, size);
+			Rect removeRect = new(rect.x, rect.center.y - (size / 2), size, size);
 			if (GUI.Button(removeRect, GUIContent.none))
 			{
 				DeselectAll();
