@@ -19,43 +19,53 @@ namespace Utility.SerializableCollection.Editor
 		protected static readonly Color selectionColor = Color.white;
 		protected static readonly Color copyColor = Color.black;
 
-		protected static readonly GUIStyle foldoutButtonStyle = new();
+		protected static GUIStyle foldoutButtonStyle;
+		protected static GUIStyle centerAlignment;
+		protected static GUIStyle rightAlignment;
+		protected static GUIStyle errorTextStyle;
+		protected static GUIStyle infoTextStyle;
 
-		protected static readonly GUIStyle centerAlignment = new(GUI.skin.label)
+		protected void SetupGUI()
 		{
-			alignment = TextAnchor.MiddleCenter
-		};
+			if (foldoutButtonStyle != null) return;
 
-		protected static readonly GUIStyle rightAlignment = new(GUI.skin.label)
-		{
-			alignment = TextAnchor.MiddleRight
-		};
+			foldoutButtonStyle = new();
+			centerAlignment = new(GUI.skin.label)
+			{
+				alignment = TextAnchor.MiddleCenter
+			};
 
-		protected static readonly GUIStyle errorTextStyle = new(GUI.skin.label)
-		{
-			fontSize = 11,
-			alignment = TextAnchor.MiddleRight,
-			normal = new GUIStyleState { textColor = EditorHelper.ErrorRedColor }
-		};
+			rightAlignment = new(GUI.skin.label)
+			{
+				alignment = TextAnchor.MiddleRight
+			};
 
-		protected static readonly GUIStyle infoTextStyle = new(GUI.skin.label)
-		{
-			fontSize = 11,
-			alignment = TextAnchor.MiddleRight,
-		};
+			errorTextStyle = new(GUI.skin.label)
+			{
+				fontSize = 11,
+				alignment = TextAnchor.MiddleRight,
+				normal = new GUIStyleState { textColor = EditorHelper.ErrorRedColor }
+			};
 
-		static MethodInfo _methodeInfo;
+			infoTextStyle = new(GUI.skin.label)
+			{
+				fontSize = 11,
+				alignment = TextAnchor.MiddleRight,
+			};
+		}
+
+		static MethodInfo _methodInfo;
 		protected static void RepaintAllInspectors()
 		{
 			// NOT SEAMS TO WORK
-			if (_methodeInfo == null)
+			if (_methodInfo == null)
 			{
 				Type inspectorWindowType = typeof(EditorApplication).Assembly.GetType("UnityEditor.InspectorWindow");
-				_methodeInfo = inspectorWindowType.GetMethod(
+				_methodInfo = inspectorWindowType.GetMethod(
 					"RepaintAllInspectors",
 					BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			}
-			_methodeInfo?.Invoke(obj: null, parameters: null);
+			_methodInfo?.Invoke(obj: null, parameters: null);
 		}
 
 		protected static void DrawSelection(Rect rect, Color color, bool inside)
@@ -118,6 +128,7 @@ namespace Utility.SerializableCollection.Editor
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
+			SetupGUI();
 			UpdateState_BeforeDrawing(position, property);
 
 			if (!TryDrawHeader(_headerRect, property, label))
