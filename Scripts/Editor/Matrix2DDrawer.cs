@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using EasyInspector;
+using EasyEditor;
 
 namespace Utility.SerializableCollection.Editor
 {
