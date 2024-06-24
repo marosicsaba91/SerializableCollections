@@ -12,6 +12,7 @@ namespace Utility.SerializableCollection.Editor
 		public override string ViewName => "Default";
 	}
 
+	[SetMatrix2DView("Matrix2DDefaultView", "Matrix2DInCellEditView")]
 	public class Matrix2DInCellEditView : Matrix2DView<object>
 	{
 		public override string ViewName => "In Cell Edit";
