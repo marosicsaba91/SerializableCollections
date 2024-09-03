@@ -124,10 +124,9 @@ namespace Utility.SerializableCollection
 			{
 				if (keys == null || values == null || keys.Count != values.Count)
 				{
-					if (keys == null)
-						keys = new List<TKey>();
-					if (values == null)
-						values = new List<TValue>();
+					keys ??= new List<TKey>();
+					values ??= new List<TValue>();
+
 					while (keys.Count > values.Count)
 						keys.RemoveAt(keys.Count - 1);
 					while (keys.Count < values.Count)
