@@ -55,7 +55,7 @@ namespace Utility.SerializableCollection
 			if (GUI.Button(addRect, EditorGUIUtility.IconContent("CreateAddNew")))
 				AddElement();
 			GUI.enabled = _selectedIndex >= 0 && _selectedIndex < _count;
-			if (GUI.Button(deleteRect, EditorGUIUtility.IconContent("winbtn_win_close_a")))
+			if (GUI.Button(deleteRect, new GUIContent(EditorHelper.GetIcon(IconType.Cross))))
 				RemoveElement();
 			GUI.enabled = _selectedIndex >= 0 && _selectedIndex < _count - 1;
 			if (GUI.Button(moveDownRect, EditorGUIUtility.IconContent("scrolldown")))
