@@ -451,7 +451,7 @@ namespace Utility.SerializableCollection.Editor
 				for (int y = 0; y < destination.size.y; y++)
 				{
 					Vector2Int sourceCoordinate = new(x, y);
-					sourceCoordinate = MathHelper.Mod(sourceCoordinate, source.size.x, source.size.y);
+					sourceCoordinate = MathHelper.ModuloPositive(sourceCoordinate, source.size.x, source.size.y);
 					sourceCoordinate.x += source.x;
 					sourceCoordinate.y += source.y;
 

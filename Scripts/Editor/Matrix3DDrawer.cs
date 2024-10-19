@@ -88,7 +88,7 @@ namespace Utility.SerializableCollection.Editor
 					for (int z = 0; z < destination.size.y; z++)
 					{
 						Vector3Int sourceCoordinate = new(x, y, z);
-						sourceCoordinate = MathHelper.Mod(sourceCoordinate, source.size.x, source.size.y, source.size.z);
+						sourceCoordinate = MathHelper.ModuloPositive(sourceCoordinate, source.size.x, source.size.y, source.size.z);
 						sourceCoordinate.x += source.x;
 						sourceCoordinate.y += source.y;
 						sourceCoordinate.z += source.z;
