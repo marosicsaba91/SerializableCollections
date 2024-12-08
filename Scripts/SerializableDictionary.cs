@@ -47,7 +47,7 @@ namespace Utility.SerializableCollection
 			else
 				_sortList.Clear();
 
-			// Copy
+			// TryGetCopy
 			foreach (TKey t in keys)
 				_sortList.Add(t);
 
